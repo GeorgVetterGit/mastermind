@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# pygbag: asyncio compatible
 """Mastermind – a Pygame implementation.
 
 Rules:
@@ -20,6 +21,7 @@ Controls:
   - Press Escape to quit.
 """
 
+import asyncio
 import random
 import sys
 import pygame
@@ -351,7 +353,7 @@ def palette_index(mx: int, my: int) -> int | None:
 # Entry point
 # ---------------------------------------------------------------------------
 
-def main() -> None:
+async def main() -> None:
     pygame.init()
     screen = pygame.display.set_mode((W, H))
     pygame.display.set_caption("Mastermind")
@@ -420,7 +422,8 @@ def main() -> None:
                             break
 
         draw(screen, game, font_big, font_med, font_sm)
+        await asyncio.sleep(0)  # yield control to the browser event loop
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
