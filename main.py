@@ -27,7 +27,7 @@ import pygame
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-W, H = 620, 760
+W, H = 620, 820
 FPS  = 60
 
 # UI Colours
@@ -62,16 +62,21 @@ CODE_LEN  = 4
 MAX_TRIES = 10
 
 # Board geometry
-BOARD_X = 45
-BOARD_Y = 70
+
 ROW_H   = 50
 PEG_R   = 17
 COL_GAP = 52   # horizontal centre-to-centre distance between code pegs
 
 # Feedback mini-pegs (2 × 2 grid per row)
-FEEDBACK_X = 278   # x of left feedback column centre
+
 FB_R       = 7
 FB_GAP     = 17    # distance between feedback peg centres
+
+board_w = COL_GAP * (CODE_LEN - 1) + PEG_R * 2 + FB_GAP + FB_R * 4 + 28
+BOARD_X = (W - board_w) // 2
+BOARD_Y = 100
+
+FEEDBACK_X = BOARD_X + board_w - 28   # x of left feedback column centre
 
 # Colour palette strip (bottom area)
 PAL_Y   = 660
@@ -80,8 +85,10 @@ PAL_GAP = 65
 PAL_R   = 22
 
 # Buttons
-SUBMIT_RECT  = pygame.Rect(468, 648, 122, 42)
-NEWGAME_RECT = pygame.Rect(468, 704, 122, 38)
+buttons_width = 2 * 122 + 18
+buttons_x = (W - buttons_width) // 2
+SUBMIT_RECT  = pygame.Rect(buttons_x, 760, 122, 42)
+NEWGAME_RECT = pygame.Rect(buttons_x + 122 + 18, 760, 122, 42)
 
 # ---------------------------------------------------------------------------
 # Game logic
@@ -218,14 +225,7 @@ def draw(
     title = font_big.render("MASTERMIND", True, GOLD)
     surface.blit(title, title.get_rect(centerx=W // 2, y=14))
 
-    # Attempt counter
-    attempt_txt = font_sm.render(
-        f"Attempt: {min(game.attempt + 1, MAX_TRIES)} / {MAX_TRIES}", True, GRAY
-    )
-    surface.blit(attempt_txt, (BOARD_X, BOARD_Y - 22))
-
     # ── Board panel ────────────────────────────────────────────────────────
-    board_w = COL_GAP * (CODE_LEN - 1) + PEG_R * 2 + FB_GAP + FB_R * 4 + 28
     board_rect = pygame.Rect(BOARD_X - 12, BOARD_Y - 8, board_w, ROW_H * MAX_TRIES + 16)
     pygame.draw.rect(surface, PANEL, board_rect, border_radius=10)
 
@@ -259,19 +259,19 @@ def draw(
         # Feedback pegs
         if row < game.attempt:
             b, w = game.guesses[row][1]
-            draw_feedback_row(surface, FEEDBACK_X, row_cy, b, w)
+            draw_feedback_row(surface, FEEDBACK_X - 23, row_cy, b, w)
 
     # ── Feedback legend ────────────────────────────────────────────────────
     legend_x = FEEDBACK_X + FB_GAP + FB_R + 10
-    pygame.draw.circle(surface, NEAR_BLACK, (legend_x, BOARD_Y - 20), 6)
-    pygame.draw.circle(surface, (105, 105, 125), (legend_x, BOARD_Y - 20), 6, 1)
-    surface.blit(font_sm.render("= right place", True, GRAY), (legend_x + 10, BOARD_Y - 29))
-    pygame.draw.circle(surface, WHITE, (legend_x, BOARD_Y - 6), 6)
-    pygame.draw.circle(surface, (105, 105, 125), (legend_x, BOARD_Y - 6), 6, 1)
-    surface.blit(font_sm.render("= right colour", True, GRAY), (legend_x + 10, BOARD_Y - 15))
+    pygame.draw.circle(surface, NEAR_BLACK, (legend_x, BOARD_Y + 13), 6)
+    pygame.draw.circle(surface, (105, 105, 125), (legend_x, BOARD_Y + 13), 6, 1)
+    surface.blit(font_sm.render("= right place", True, GRAY), (legend_x + 10, BOARD_Y + 1))
+    pygame.draw.circle(surface, WHITE, (legend_x, BOARD_Y + 27), 6)
+    pygame.draw.circle(surface, (105, 105, 125), (legend_x, BOARD_Y + 27), 6, 1)
+    surface.blit(font_sm.render("= right colour", True, GRAY), (legend_x + 10, BOARD_Y + 15))
 
     # ── Separator ──────────────────────────────────────────────────────────
-    sep_y = BOARD_Y + MAX_TRIES * ROW_H + 14
+    sep_y = BOARD_Y + MAX_TRIES * ROW_H + 20
     pygame.draw.line(surface, (70, 70, 95), (22, sep_y), (W - 22, sep_y), 1)
 
     # ── Status message ─────────────────────────────────────────────────────
@@ -295,11 +295,11 @@ def draw(
 
     # ── Colour palette ─────────────────────────────────────────────────────
     pal_label = font_sm.render("Colour palette  (1–6):", True, LGRAY)
-    surface.blit(pal_label, (PAL_X, PAL_Y - 24))
+    surface.blit(pal_label, (PAL_X, PAL_Y - 30))
 
     for i in range(N_COLORS):
         cx = PAL_X + i * PAL_GAP + PAL_R
-        cy = PAL_Y + PAL_R
+        cy = PAL_Y + PAL_R + 10
         c  = PEG_PALETTE[i]
         pygame.draw.circle(surface, c, (cx, cy), PAL_R)
         pygame.draw.circle(surface, _highlight(c), (cx - PAL_R // 3, cy - PAL_R // 3), PAL_R // 3)
@@ -312,18 +312,18 @@ def draw(
 
     # ── Selected colour preview ────────────────────────────────────────────
     sel_x = PAL_X + 6 * PAL_GAP + PAL_R + 18
-    surface.blit(font_sm.render("Selected:", True, LGRAY), (sel_x, PAL_Y - 24))
+    surface.blit(font_sm.render("Selected:", True, LGRAY), (sel_x, PAL_Y - 30))
     sc = PEG_PALETTE[game.selected]
-    pygame.draw.circle(surface, sc, (sel_x + 24, PAL_Y + PAL_R), PAL_R + 4)
-    pygame.draw.circle(surface, _highlight(sc), (sel_x + 24 - (PAL_R + 4) // 3, PAL_Y + PAL_R - (PAL_R + 4) // 3), (PAL_R + 4) // 3)
-    pygame.draw.circle(surface, WHITE, (sel_x + 24, PAL_Y + PAL_R), PAL_R + 4, 3)
+    pygame.draw.circle(surface, sc, (sel_x + 24, PAL_Y + PAL_R + 10), PAL_R + 4)
+    pygame.draw.circle(surface, _highlight(sc), (sel_x + 24 - (PAL_R + 4) // 3, PAL_Y + PAL_R + 10 - (PAL_R + 4) // 3), (PAL_R + 4) // 3)
+    pygame.draw.circle(surface, WHITE, (sel_x + 24, PAL_Y + PAL_R + 10), PAL_R + 4, 3)
     sel_name = font_sm.render(COLOR_NAMES[game.selected], True, LGRAY)
-    surface.blit(sel_name, sel_name.get_rect(centerx=sel_x + 24, y=PAL_Y + PAL_R * 2 + 8))
+    surface.blit(sel_name, sel_name.get_rect(centerx=sel_x + 24, y=(PAL_Y + PAL_R + 10) + PAL_R + 3))
 
     # ── Buttons ────────────────────────────────────────────────────────────
     can_submit = None not in game.current and game.state == "playing"
-    draw_button(surface, SUBMIT_RECT, "Submit ↵", font_med, BTN_BLUE, active=can_submit)
-    draw_button(surface, NEWGAME_RECT, "New Game  N", font_sm, BTN_GREEN, active=True)
+    draw_button(surface, SUBMIT_RECT, "Submit", font_med, BTN_BLUE, active=can_submit)
+    draw_button(surface, NEWGAME_RECT, "New Game", font_sm, BTN_GREEN, active=True)
 
     pygame.display.flip()
 
