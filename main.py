@@ -276,25 +276,6 @@ def draw(
     sep_y = BOARD_Y + MAX_TRIES * ROW_H + 20
     pygame.draw.line(surface, (70, 70, 95), (22, sep_y), (W - 22, sep_y), 1)
 
-    # ── Status message ─────────────────────────────────────────────────────
-    if game.state == "won":
-        msg = font_med.render(
-            f"🎉  You cracked it in {game.attempt} guess{'es' if game.attempt != 1 else ''}!",
-            True, G_OK,
-        )
-        surface.blit(msg, msg.get_rect(centerx=W // 2, y=sep_y + 6))
-        # Reveal secret
-        lbl = font_sm.render("Secret:", True, LGRAY)
-        surface.blit(lbl, (BOARD_X + 2, sep_y + 34))
-        for i, c in enumerate(game.secret):
-            draw_peg(surface, BOARD_X + 75 + i * 44, sep_y + 42, c, r=13)
-
-    elif game.state == "lost":
-        msg = font_med.render("No more attempts! The secret was:", True, R_ERR)
-        surface.blit(msg, msg.get_rect(centerx=W // 2, y=sep_y + 6))
-        for i, c in enumerate(game.secret):
-            draw_peg(surface, W // 2 - 75 + i * 44, sep_y + 38, c, r=13)
-
     # ── Colour palette ─────────────────────────────────────────────────────
     pal_label = font_sm.render("Colour palette  (1–6):", True, LGRAY)
     surface.blit(pal_label, (PAL_X, PAL_Y - 30))
@@ -326,6 +307,32 @@ def draw(
     can_submit = None not in game.current and game.state == "playing"
     draw_button(surface, SUBMIT_RECT, "Submit", font_med, BTN_BLUE, active=can_submit)
     draw_button(surface, NEWGAME_RECT, "New Game", font_sm, BTN_GREEN, active=True)
+
+    # ── Status message ─────────────────────────────────────────────────────
+    if game.state == "won":
+
+        # rect behind text
+        msg_bg_rect = pygame.Rect(0, sep_y + 4, W, 80)
+        pygame.draw.rect(surface, PANEL, msg_bg_rect)
+
+        msg = font_med.render(
+            f"You cracked it in {game.attempt} guess{'es' if game.attempt != 1 else ''}!",
+            True, G_OK,
+        )
+        surface.blit(msg, msg.get_rect(centerx=W // 2, y=sep_y + 6))
+        # Reveal secret
+        for i, c in enumerate(game.secret):
+            draw_peg(surface, BOARD_X + 75 + i * 44, sep_y + 55, c, r=13)
+
+    elif game.state == "lost":
+        # rect behind text
+        msg_bg_rect = pygame.Rect(0, sep_y + 4, W, 80)
+        pygame.draw.rect(surface, PANEL, msg_bg_rect)
+
+        msg = font_med.render("No more attempts! The secret was:", True, R_ERR)
+        surface.blit(msg, msg.get_rect(centerx=W // 2, y=sep_y + 6))
+        for i, c in enumerate(game.secret):
+            draw_peg(surface, W // 2 - 75 + i * 44, sep_y + 55, c, r=13)
 
     pygame.display.flip()
 
