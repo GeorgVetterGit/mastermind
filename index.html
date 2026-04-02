@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mastermind – Project Report</title>
+  <meta name="description" content="Mastermind – a classic logic game built with Python and Pygame." />
+  <style>
+    :root{
+      --accent:#3b82f6;
+      --accent-dim:rgba(59,130,246,0.15);
+      --muted:#94a3b8;
+      --bg:#0b0f19;
+      --card:rgba(20,25,40,0.75);
+      --card-border:rgba(255,255,255,0.06);
+      --text:#e2e8f0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);line-height:1.45}
+    .container{max-width:1100px;margin:28px auto;padding:20px}
+
+    .hero{position:relative;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4)}
+    .hero img{width:100%;height:320px;object-fit:cover;display:block}
+    .hero video{width:100%;height:320px;object-fit:cover;display:block}
+    .hero .overlay{position:absolute;left:0;right:0;bottom:0;padding:18px;background:linear-gradient(180deg,transparent 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.75) 100%);color:#fff}
+    .hero h1{margin:0;font-size:clamp(20px,3.6vw,30px)}
+    .meta{font-size:14px;opacity:.9;margin-top:6px}
+
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:20px;margin-top:20px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}.hero img{height:220px}.hero video{height:220px}}
+
+    .card{background:var(--card);padding:18px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.25);border:1px solid var(--card-border);backdrop-filter:blur(12px)}
+    h2{margin:0 0 10px 0;color:#f1f5f9}
+    p{margin:0 0 12px 0;color:var(--muted)}
+    ul{margin:0 0 12px 20px;color:var(--muted)}
+    li strong{color:#cbd5e1}
+
+    .screenshots{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+    .screenshots img{width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.3);object-fit:cover}
+
+    .sim-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media (max-width:520px){.sim-list{grid-template-columns:1fr}}
+    .sim{display:flex;gap:12px;align-items:center;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03)}
+    .sim .thumb{width:64px;height:48px;background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(59,130,246,0.05));display:flex;align-items:center;justify-content:center;border-radius:6px;font-weight:600;color:var(--accent)}
+    .sim a{color:var(--accent);font-weight:600;text-decoration:none}
+    .sim small{display:block;color:var(--muted)}
+
+    .tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+    .tag{background:var(--accent-dim);color:var(--accent);padding:4px 10px;border-radius:9999px;font-size:13px;font-weight:500}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:14px}
+
+    .links{margin-top:20px;display:flex;gap:12px}
+    .btn{display:inline-block;padding:8px 12px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none;font-weight:600}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(59,130,246,0.25)}
+    .btn.ghost:hover{background:var(--accent-dim)}
+
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;padding:18px;z-index:60;backdrop-filter:blur(4px)}
+    .modal.open{display:flex}
+    .modal .frame{width:100%;max-width:980px;background:#151b2e;border-radius:10px;overflow:hidden;border:1px solid var(--card-border)}
+    .modal .frame header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.06)}
+    .modal iframe{width:100%;height:600px;border:0}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero" role="img" aria-label="Project banner area">
+      <img src="assets/banner.png" alt="Mastermind Banner">
+      <div class="overlay">
+        <h1>Mastermind</h1>
+        <div class="meta">Project Report</div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <main>
+        <div class="card">
+          <h2>Introduction</h2>
+          <p>Mastermind is a digital recreation of the classic logic game, developed in Python using the Pygame framework. The objective of the game is to guess a hidden colour code within a limited number of attempts. After each guess, the player receives feedback in the form of black and white pegs, indicating how close the guess is to the secret code.</p>
+
+          <h2>Game Overview</h2>
+          <p>The game follows the classic Mastermind rules:</p>
+          <ul>
+            <li>A secret code consisting of coloured pegs is randomly generated.</li>
+            <li>The player has a fixed number of attempts to crack the code.</li>
+            <li>After each guess, the game provides feedback:
+              <ul>
+                <li><strong>Black peg:</strong> Correct colour in the correct position.</li>
+                <li><strong>White peg:</strong> Correct colour in the wrong position.</li>
+              </ul>
+            </li>
+            <li>The game ends when the code is cracked or all attempts are used up.</li>
+          </ul>
+
+          <h2>Features</h2>
+          <ul>
+            <li>Intuitive graphical interface built with Pygame</li>
+            <li>Colour selection via mouse click</li>
+            <li>Visual feedback after each guess</li>
+            <li>Adjustable difficulty (number of colours and code positions)</li>
+            <li>Playable in the browser thanks to Pygbag compilation</li>
+          </ul>
+
+          <h2>Technical Implementation</h2>
+          <p>The project was implemented entirely in Python and uses Pygame for graphical rendering. The game logic is cleanly separated from the rendering layer, enabling easy extensibility.</p>
+          <ul>
+            <li><strong>Language:</strong> Python 3.12</li>
+            <li><strong>Framework:</strong> Pygame</li>
+            <li><strong>Web Deployment:</strong> Pygbag (Python-to-WebAssembly compilation)</li>
+            <li><strong>Architecture:</strong> Modular design with separated game logic and UI</li>
+          </ul>
+
+          <h2>Game Mechanics</h2>
+          <p>The core mechanic is based on deductive reasoning. By combining the clues from previous attempts, the player can systematically narrow down the possible solutions. The feedback algorithm compares the guess against the secret code and calculates the number of black and white pegs according to the official Mastermind rules.</p>
+
+          <h2>Conclusion</h2>
+          <p>This project demonstrates the implementation of a classic board game as an interactive web application. By using Pygame and Pygbag, the game is playable both locally and in the browser. The project serves as an example of small-scale game development with Python and shows how traditional game concepts can be brought into the digital realm.</p>
+
+          <div class="tags">
+            <span class="tag">Pygame</span>
+            <span class="tag">Python</span>
+            <span class="tag">Logic Game</span>
+            <span class="tag">WebAssembly</span>
+            <span class="tag">Game Development</span>
+          </div>
+
+          <div class="links">
+            <a class="btn ghost" href="https://github.com/GeorgVetterGit/mastermind" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </div>
+      </main>
+
+      <aside>
+        <div class="card">
+          <h2>Try the Game</h2>
+          <p>Mastermind can be played directly in the browser.</p>
+
+          <div class="sim-list">
+            <article class="sim">
+              <div class="thumb">&#9654;</div>
+              <div>
+                <a href="#" data-src="build/web/index.html" class="open-sim">Play Mastermind</a>
+                <small>Launch the game in your browser.</small>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <h2>Game Rules</h2>
+          <p>Mastermind is a logic game for one player against the computer.</p>
+          <ul>
+            <li>Guess the secret colour code</li>
+            <li>Use the clues (black/white) to narrow down the solution</li>
+            <li>The fewer attempts, the better</li>
+          </ul>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <h2>Technology</h2>
+          <ul>
+            <li>&#128013; Python 3.12</li>
+            <li>&#127918; Pygame</li>
+            <li>&#127760; Pygbag (WebAssembly)</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      &copy; 2025 Georg Vetter. All rights reserved.
+    </footer>
+  </div>
+
+  <div id="simModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="frame" role="document">
+      <header>
+        <strong id="simTitle">Mastermind</strong>
+        <div>
+          <button id="closeModal" class="btn ghost">Close</button>
+          <a id="openInTab" class="btn" href="#" target="_blank" rel="noopener">Open in new tab</a>
+        </div>
+      </header>
+      <iframe id="simFrame" src="about:blank" title="Game Preview"></iframe>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.open-sim').forEach(el=>{
+      el.addEventListener('click', function(e){
+        e.preventDefault();
+        const src = this.getAttribute('data-src');
+        if(!src){ window.open(this.href || '#','_blank'); return; }
+        const modal = document.getElementById('simModal');
+        const frame = document.getElementById('simFrame');
+        const title = document.getElementById('simTitle');
+        const openInTab = document.getElementById('openInTab');
+        title.textContent = this.textContent || 'Mastermind';
+        frame.src = src;
+        openInTab.href = src;
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden','false');
+      })
+    })
+    document.getElementById('closeModal').addEventListener('click', ()=>{
+      const modal = document.getElementById('simModal');
+      const frame = document.getElementById('simFrame');
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden','true');
+      frame.src = 'about:blank';
+    })
+    document.getElementById('simModal').addEventListener('click', (ev)=>{
+      if(ev.target.id === 'simModal') document.getElementById('closeModal').click();
+    })
+  </script>
+</body>
+</html>
